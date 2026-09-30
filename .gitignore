@@ -1,0 +1,8 @@
+results/
+samples/
+.nextflow
+work/
+*.fastq.gz
+*.gz
+*.gtf
+*.bam
