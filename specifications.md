@@ -1,12 +1,49 @@
+> **Note:** Sections marked **Instructions:** are scaffolding to guide you. Delete every
+> instruction block (and the Example Table) once you've filled in the section, so the final
+> document contains only your specifications.
+
+# Provided Diagram
+
+```mermaid
+flowchart TD
+    samplesheet[/"Samplesheet (CSV)<br/>paired-end FASTQ reads"/]
+    genome[/"Reference genome FASTA"/]
+    gtf[/"GTF annotation"/]
+
+    samplesheet --> fastqc["FASTQC"]
+    genome --> index["STAR genomeGenerate"]
+    gtf --> index
+    samplesheet --> align["STAR align"]
+    index --> align
+    align -->|BAM| verse["VERSE"]
+    gtf --> verse
+    verse --> concat["Concatenate VERSE counts"]
+    gtf --> parse["Parse GTF<br/>(gene IDs → gene names)"]
+
+    fastqc --> multiqc["MultiQC"]
+    align -->|logs| multiqc
+
+    multiqc --> multiqc_out[("MultiQC report")]
+    concat --> counts_out[("Counts matrix")]
+    parse --> map_out[("Gene ID / name mapping")]
+```
+
+
 # Objective
 
+> **Instructions:** Based on the diagram above, write a short paragraph describing the
+> workflow. You can use the template from the first project as inspiration.
+>
+> *Delete this instruction block once you've completed this section.*
 
 # Inputs
 
-Describe the starting data including:
-
-1. How many samples?
-2. Where and how the samples are recorded? (i.e. a samplesheet with columns named X, Y, Z, etc.)
+> **Instructions:** Describe the starting data, including:
+>
+> 1. How many samples?
+> 2. Where and how are the samples recorded? (i.e. a samplesheet with columns named X, Y, Z, etc.)
+>
+> *Delete this instruction block once you've completed this section.*
 
 # Outputs
 
@@ -22,18 +59,22 @@ Per pipeline run:
 
 # Pipeline Steps
 
-Fill in one row per process in the pipeline. Derive the step list from the Objective and Outputs
-sections above. "Depends on" should name the upstream step(s) whose output this step consumes
-(used for wiring channels).
+> **Instructions:** Fill in one row per process in the pipeline. Derive the step list from the
+> Objective and Outputs sections above. "Depends on" should name the upstream step(s) whose output
+> this step consumes (used for wiring channels).
+>
+> The Example Table below is a simple worked example (not from this pipeline) showing the expected
+> format: a process that downloads a genome, followed by a process that runs a script on it.
+> **Delete the Example Table and this instruction block before you submit.**
 
-The rows below are a simple worked example (not from this pipeline) showing the expected format:
-a process that downloads a genome, followed by a process that runs a script on it. Delete this
-example table before you submit.
+## Example Table
 
 | Step | Input type | Depends on *(sample)* |
 |---|---|---|
 | Download genome *(sample)* | Accession ID | - |
 | Run script on genome *(sample)* | Genome FASTA | Download genome |
+
+## Pipeline Table
 
 | Step | Input type | Depends on |
 |---|---|---|
@@ -55,13 +96,15 @@ the stub runs should use the name from the CSV to identify outputs by their spec
 of origin.
 
 # Environment and Reproducibility
-Conda environments are defined per-tool in the envs/ directory.
+For this project, we are switching over to using Docker containers through Singularity.
 
-For each tool used in the pipeline, confirm the conda env pins an exact version (not just a
-channel), and note any tool where exact pinning isn't possible (e.g., no conda-forge/bioconda
-package) and how you're mitigating that.
+> **Instructions:** Look at the [Pipeline Containers](https://github.com/bu-cds-bf528/pipeline_containers)
+> repository and fill in which versions of tools were used in your pipeline.
+>
+> *Delete this instruction block once you've completed this section.*
 
-| Tool | Env file | Version pinned? |
+
+| Tool | Env file | Version |
 |---|---|---|
 |  |  |  |
 |  |  |  |
@@ -73,11 +116,12 @@ package) and how you're mitigating that.
 
 # Resource Requirements
 
-Every process has been assigned a label found in `nextflow.config` that requisitions
-an appropriate amount of resources. The most resource intensive steps include Bowtie2 
-index creation, alignment of the short reads, draft assembly by Flye, and assembly polishing
-by pilon.
-
+| CPUs | RAM | Label | Rationale |
+|---|---|---|---|
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
+|  |  |  |  |
 
 # Success Criteria
 
@@ -88,11 +132,13 @@ The stub-run correctly produces named placeholder outputs for each row in the or
 
 # Validation Table
 
-
-| Step | Parameter justification *(sample)* | Confidence *(sample)* | Validation *(sample)* |
+| Step | Parameter justification | Confidence | Validation |
 |---|---|---|---|
-| Sequencing quality control | Default FastQC parameters; adapter trimming skipped since STAR soft-clips at alignment | High | Per-base quality >Q30 across all cycles, all 3 samples |
-| Alignment | Default STAR parameters, appropriate for 100bp paired-end reads | Medium | 88-92% uniquely-mapped across samples |
-| Post-alignment QC | Default RSeQC settings; no strandedness flag since library prep is unstranded | Medium | >80% of reads in CDS exons + UTRs, consistent with poly-A selection |
-| QC aggregation & reporting | Default MultiQC settings; no custom config needed | High | All 3 samples present in every module of the report |
+| Sequencing quality control |  |  |  |
+| Genome indexing |  |  |  |
+| Alignment |  |  |  |
+| Quantification |  |  |  |
+| Counts concatenation |  |  |  |
+| GTF parsing |  |  |  |
+| QC aggregation & reporting |  |  |  |
 

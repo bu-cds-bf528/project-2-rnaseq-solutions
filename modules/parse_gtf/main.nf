@@ -1,20 +1,27 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
 process PARSE_GTF {
+
     label 'process_single'
-    conda 'envs/biopython_env.yml'
     container 'ghcr.io/bf528/biopython:latest'
-    publishDir params.outdir
 
     input:
-    path gtf
+    ref: Path
     
     output:
-    path('id2name.txt'), emit: id2name
+    gene_map: Path = file("id2name.txt")
 
-    shell:
+    script:
     """
-    parse_gtf.py -i $gtf -o id2name.txt
+    parse_gtf.py -i $ref -o id2name.txt
     """
+
+    stub:
+    """
+    touch id2name.txt
+    """
+
 
 }

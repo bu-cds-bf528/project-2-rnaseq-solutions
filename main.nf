@@ -1,5 +1,7 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
 include {FASTQC} from './modules/fastqc'
 include {INDEX} from './modules/star_index'
 include {ALIGN} from './modules/star_align'
@@ -11,34 +13,25 @@ include {MULTIQC} from './modules/multiqc'
 
 workflow {
     
-    Channel.fromFilePairs(params.reads).transpose().set{ fastqc_ch }
-    Channel.fromFilePairs(params.reads).set { align_ch }
+    read_ch = channel.fromPath(params.subset_reads).splitCsv(header: true).map { it -> record(name: , r1:, r2: )}
 
+    fastqc_ch = read_ch.flatMap { it -> [record(name:, fastq:), record(name:, fastq:)]}
+
+    gene_map = PARSE_GTF(params.gtf)
+    fastqc_out = FASTQC(fastqc_ch)
     
-    PARSE_GTF(params.gtf)
-    FASTQC(fastqc_ch)
-    INDEX(params.genome, params.gtf)
+    star_index_ch = INDEX(params.genome, params.gtf)
 
-    ALIGN(align_ch, INDEX.out.index)
+    bam_ch = ALIGN(read_ch, star_index_ch)
 
-    FASTQC.out.zip.map{ it[1] }.collect()
-    | set { fastqc_out }
-
-    ALIGN.out.log.map{ it[1] }.collect()
-    | set { star_log }
-
-    fastqc_out.mix(star_log).flatten().collect()
-    | set { multiqc_ch }
-
-
-    MULTIQC(multiqc_ch)
+    multiqc_ch = bam_ch.log.mix(fastqc_out.zip).collect(sort: true)
+    multiqc_out = MULTIQC(multiqc_ch)
     
-    VERSE(ALIGN.out.bam, params.gtf)
+    verse_ch = VERSE(bam_ch, params.gtf)
 
-    VERSE.out.counts.map{ it[1] }.collect().set{ concat_ch } 
+    concat_ch = verse_ch.collect()
 
-    CONCAT(concat_ch)
+    mat = CONCAT(concat_ch)
 
-    multiqc_ch.view()
 
 }

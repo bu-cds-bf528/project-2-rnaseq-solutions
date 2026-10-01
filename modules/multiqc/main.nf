@@ -1,18 +1,24 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
 process MULTIQC {
     label 'process_low'
     container 'ghcr.io/bf528/multiqc:latest'
-    publishDir params.outdir, mode: 'copy'
 
     input:
-    path('*')
+    logs: List<Path>
 
     output:
-    path("*.html")
+    report: Path = file("multiqc_report.html")
 
-    shell:
+    script:
     """
-    multiqc . -f
+    multiqc .
+    """
+
+    stub:
+    """
+    touch multiqc_report.html
     """
 }

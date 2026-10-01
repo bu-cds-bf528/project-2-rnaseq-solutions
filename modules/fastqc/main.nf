@@ -1,19 +1,32 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
+
+record FastqRec {
+    name: String
+    fastq: Path
+
+}
+
+record FastQC {
+    zip: Path
+    html: Path
+
+}
+
 process FASTQC {
     label 'process_low'
     container 'ghcr.io/bf528/fastqc:latest'
-    publishDir params.outdir, mode: 'copy'
 
     input:
-    tuple val(sample_id), path(reads)
+    reads: FastqRec
 
     output:
-    tuple val(sample_id), path("*.html"), emit: html
-    tuple val(sample_id), path("*.zip"), emit: zip
+    record(zip: "*.zip", html: "*.zip")
 
-    shell:
+    script:
     """
-    fastqc -t $task.cpus $reads
+    fastqc -t $task.cpus $reads.fastq
     """
 }

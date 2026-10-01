@@ -1,19 +1,26 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
+record StarRecord {
+    bam: Path
+    log: Path
+}
+
 process VERSE {
     label 'process_single'
     container 'ghcr.io/bf528/verse:latest'
     publishDir params.outdir, mode: 'copy'
 
     input:
-    tuple val(meta), path(bam)
-    path(gtf)
+    star: StarRecord
+    gtf: Path
 
     output:
-    tuple val(meta), path("*exon.txt"), emit: counts
+    verse_cts: Path = file("*.exon.txt")
 
     shell:
     """
-    verse -S -a $gtf -o $meta $bam
+    verse -S -a $gtf -o ${star.bam.simpleName} $star.bam
     """
 }

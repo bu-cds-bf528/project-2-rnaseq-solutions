@@ -1,21 +1,37 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
+record SampleRecord {
+    name: String
+    r1: Path
+    r2: Path
+}
+
+record StarRecord {
+    bam: Path
+    log: Path
+}
+
 process ALIGN {
     label 'process_high'
-    conda 'envs/star_env.yml'
     container 'ghcr.io/bf528/star:latest'
-    publishDir params.outdir, pattern: "*.Log.final.out"
 
     input:
-    tuple val(meta), path(reads)
-    path(index)
+    sample: SampleRecord
+    index: Path
 
     output:
-    tuple val(meta), path("${meta}.Aligned.out.bam"), emit: bam
-    tuple val(meta), path("${meta}.Log.final.out"), emit: log
+    record(bam: file("*.bam"), log: file("*.log"))
 
     script:
     """
-    STAR --runThreadN $task.cpus --genomeDir $index --readFilesIn $reads --readFilesCommand zcat --outFileNamePrefix $meta. --outSAMtype BAM Unsorted
+    STAR --runThreadN $task.cpus --genomeDir $index --readFilesIn $r1 $r2 --readFilesCommand zcat --outFileNamePrefix $sample.name --outSAMtype BAM Unsorted
+    """
+
+    stub:
+    """
+    touch ${sample.name}.bam
+    touch ${sample.name}.log
     """
 }

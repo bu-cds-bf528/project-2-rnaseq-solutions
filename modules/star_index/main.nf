@@ -1,20 +1,27 @@
 #!/usr/bin/env nextflow
 
+nextflow.enable.types = true
+
 process INDEX {
     label 'process_high'
     container 'ghcr.io/bf528/star:latest'
 
     input:
-    path genome
-    path gtf
+    fa: Path
+    annot: Path
 
     output:
-    path "star", emit: index
+    idx: Path = file("star_index/")
 
-    shell:
+    script:
     """
-    mkdir star
+    mkdir star_index
     STAR --runThreadN $task.cpus --runMode genomeGenerate --genomeDir star --genomeFastaFiles $genome --sjdbGTFfile $gtf
+    """
+
+    stub:
+    """
+    mkdir star_index
     """
 
 }
