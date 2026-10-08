@@ -93,8 +93,7 @@ Per pipeline run:
 # Development Workflow
 
 Every process defines a `stub:` run that produces placeholder output files. All of
-the stub runs should use the name from the CSV to identify outputs by their species
-of origin.
+the stub runs should use the name from the CSV to identify outputs by their name.
 
 # Environment and Reproducibility
 For this project, we are switching over to using Docker containers through Singularity.
