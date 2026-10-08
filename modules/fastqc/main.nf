@@ -9,12 +9,6 @@ record FastqRec {
 
 }
 
-record FastQC {
-    zip: Path
-    html: Path
-
-}
-
 process FASTQC {
     label 'process_low'
     container 'ghcr.io/bu-cds-bf528/fastqc:latest'

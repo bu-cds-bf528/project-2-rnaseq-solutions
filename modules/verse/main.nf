@@ -19,7 +19,7 @@ process VERSE {
     output:
     verse_cts: Path = file("*.exon.txt")
 
-    shell:
+    script:
     """
     verse -S -a $gtf -o ${star.bam.simpleName} $star.bam
     """

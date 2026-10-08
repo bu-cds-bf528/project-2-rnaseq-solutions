@@ -21,7 +21,9 @@ workflow {
     gene_map = PARSE_GTF(file(params.gtf))
     fastqc_out = FASTQC(fastqc_ch)
     
-    star_index_ch = INDEX(file(params.genome), file(params.gtf))
+    idx_ch = channel.of(record(fa: file(params.genome), gtf: file(params.gtf)))
+
+    star_index_ch = INDEX(idx_ch)
 
     bam_ch = ALIGN(read_ch, star_index_ch)
 

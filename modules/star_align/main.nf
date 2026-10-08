@@ -8,10 +8,6 @@ record SampleRecord {
     r2: Path
 }
 
-record StarRecord {
-    bam: Path
-    log: Path
-}
 
 process ALIGN {
     label 'process_high'
@@ -32,6 +28,6 @@ process ALIGN {
     stub:
     """
     touch ${sample.name}.bam
-    touch ${sample.name}.log
+    touch ${sample.name}.Log.final.out
     """
 }
