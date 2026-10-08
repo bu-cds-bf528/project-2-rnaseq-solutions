@@ -5,7 +5,7 @@ nextflow.enable.types = true
 process PARSE_GTF {
 
     label 'process_single'
-    container 'ghcr.io/bf528/biopython:latest'
+    container 'ghcr.io/bu-cds-bf528/biopython:latest'
 
     input:
     ref: Path

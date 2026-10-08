@@ -15,18 +15,18 @@ record StarRecord {
 
 process ALIGN {
     label 'process_high'
-    container 'ghcr.io/bf528/star:latest'
+    container 'ghcr.io/bu-cds-bf528/star:latest'
 
     input:
     sample: SampleRecord
     index: Path
 
     output:
-    record(bam: file("*.bam"), log: file("*.log"))
+    record(bam: file("*.bam"), log: file("*.Log.final.out"))
 
     script:
     """
-    STAR --runThreadN $task.cpus --genomeDir $index --readFilesIn $r1 $r2 --readFilesCommand zcat --outFileNamePrefix $sample.name --outSAMtype BAM Unsorted
+    STAR --runThreadN $task.cpus --genomeDir $index --readFilesIn $sample.r1 $sample.r2 --readFilesCommand zcat --outFileNamePrefix ${sample.name}. --outSAMtype BAM Unsorted
     """
 
     stub:

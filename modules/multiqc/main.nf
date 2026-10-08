@@ -3,8 +3,8 @@
 nextflow.enable.types = true
 
 process MULTIQC {
-    label 'process_low'
-    container 'ghcr.io/bf528/multiqc:latest'
+    label 'process_single'
+    container 'ghcr.io/bu-cds-bf528/multiqc:latest'
 
     input:
     logs: List<Path>

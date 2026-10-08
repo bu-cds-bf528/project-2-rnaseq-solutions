@@ -17,16 +17,22 @@ record FastQC {
 
 process FASTQC {
     label 'process_low'
-    container 'ghcr.io/bf528/fastqc:latest'
+    container 'ghcr.io/bu-cds-bf528/fastqc:latest'
 
     input:
     reads: FastqRec
 
     output:
-    record(zip: "*.zip", html: "*.zip")
+    record(zip: file("*.zip"), html: file("*.html"))
 
     script:
     """
     fastqc -t $task.cpus $reads.fastq
+    """
+
+    stub:
+    """
+    touch ${reads.fastq.simpleName}.html
+    touch ${reads.fastq.simpleName}.zip
     """
 }

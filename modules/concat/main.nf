@@ -3,7 +3,8 @@
 nextflow.enable.types = true
 
 process CONCAT {
-    container 'ghcr.io/bf528/pandas:latest'
+    container 'ghcr.io/bu-cds-bf528/pandas:latest'
+    label 'process_single'
 
     input:
     cts: List<Path>

@@ -4,7 +4,7 @@ nextflow.enable.types = true
 
 process INDEX {
     label 'process_high'
-    container 'ghcr.io/bf528/star:latest'
+    container 'ghcr.io/bu-cds-bf528/star:latest'
 
     input:
     fa: Path
@@ -16,7 +16,7 @@ process INDEX {
     script:
     """
     mkdir star_index
-    STAR --runThreadN $task.cpus --runMode genomeGenerate --genomeDir star --genomeFastaFiles $genome --sjdbGTFfile $gtf
+    STAR --runThreadN $task.cpus --runMode genomeGenerate --genomeDir star_index --genomeFastaFiles $fa --sjdbGTFfile $annot
     """
 
     stub:

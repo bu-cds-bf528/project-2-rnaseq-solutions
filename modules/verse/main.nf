@@ -8,9 +8,9 @@ record StarRecord {
 }
 
 process VERSE {
-    label 'process_single'
-    container 'ghcr.io/bf528/verse:latest'
-    publishDir params.outdir, mode: 'copy'
+    label 'process_medium'
+    container 'ghcr.io/bu-cds-bf528/verse:latest'
+
 
     input:
     star: StarRecord
@@ -22,5 +22,10 @@ process VERSE {
     shell:
     """
     verse -S -a $gtf -o ${star.bam.simpleName} $star.bam
+    """
+
+    stub:
+    """
+    touch ${star.bam.simpleName}.exon.txt
     """
 }

@@ -61,7 +61,8 @@ Per pipeline run:
 
 > **Instructions:** Fill in one row per process in the pipeline. Derive the step list from the
 > Objective and Outputs sections above. "Depends on" should name the upstream step(s) whose output
-> this step consumes (used for wiring channels).
+> this step consumes (used for wiring channels). Try to list only the minimum set of files needed
+> for the next step. 
 >
 > The Example Table below is a simple worked example (not from this pipeline) showing the expected
 > format: a process that downloads a genome, followed by a process that runs a script on it.
@@ -141,4 +142,5 @@ The stub-run correctly produces named placeholder outputs for each row in the or
 | Counts concatenation |  |  |  |
 | GTF parsing |  |  |  |
 | QC aggregation & reporting |  |  |  |
+| Differential Expression | | | |
 

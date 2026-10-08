@@ -1,6 +1,6 @@
 results/
 samples/
-.nextflow
+.nextflow*
 work/
 *.fastq.gz
 *.gz
