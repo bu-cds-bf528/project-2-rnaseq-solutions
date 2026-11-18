@@ -36,9 +36,7 @@ Check that they address:
   cannot detect (e.g. clone-specific effects, time-dependent effects at a single stage)
 - Potential confounders and whether they can be accounted for (e.g. samples
   differentiated or sequenced in different batches, differences in
-  differentiation efficiency) — with only condition in the metadata, the
-  correct answer is usually "we can't adjust for it; we can only look for it in
-  sample QC"
+  differentiation efficiency) — with only condition in the metadata
 
 
 
