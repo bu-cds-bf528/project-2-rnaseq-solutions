@@ -1,0 +1,573 @@
+# BF528 Project 2 Grading Guide — RNAseq (TYK2 KO vs WT, stage 5)
+
+Paper (revealed in Phase 2): Chandra et al. 2022, *Nat Commun* 13:6363 —
+https://www.nature.com/articles/s41467-022-34069-z
+
+---
+
+## Reference values (what to expect)
+
+| Item | Expected |
+|---|---|
+| Design | 2 groups (control/WT vs experimental/KO), 3 replicates each |
+| Reads per sample | Roughly 90M–100M |
+| FastQC | High duplication rate (expected for RNAseq; not a reason to reject) |
+| Overrepresented sequences / adapters | Minimal |
+| Alignment rate | ~90% in most samples |
+| Multimapping rate | ~5% across samples |
+| Overall QC verdict | High quality, suitable for downstream analysis |
+| Genes after filtering | ≥10k; fewer suggests over-aggressive filtering |
+| Sample QC | Groups separate; one experimental replicate is apart from the other two |
+| Paper's DE counts | 319 up, 412 down at FDR < 0.01 |
+| Paper's enrichment themes (Fig. 3) | ECM, integrins, tyrosine kinases, β-cell development, neuronal system |
+| Paper's broader claims | TYK2 loss impairs emergence of endocrine precursors via KRAS; mature SC-islet function unaffected; TYK2 loss/inhibition blocks IFNα-induced antigen presentation (MHC I/II) and protects against CD8+ T-cell killing |
+
+---
+
+# Phase 1: Blind analysis
+
+## Experimental Design (1 paragraph)
+
+Check that they address:
+- Number of groups and replicates per group (2 × 3)
+- Covariates provided — the metadata only gives condition; they should say
+  so rather than skip the question
+- What comparison the design supports (a single two-group contrast) and what it
+  cannot detect (e.g. clone-specific effects, time-dependent effects at a single stage)
+- Potential confounders and whether they can be accounted for (e.g. samples
+  differentiated or sequenced in different batches, differences in
+  differentiation efficiency) — with only condition in the metadata, the
+  correct answer is usually "we can't adjust for it; we can only look for it in
+  sample QC"
+
+
+
+## Methods (as long as needed)
+
+As in Project 1, check:
+1. Every software tool has a version
+2. Steps without custom arguments say "with default parameters"
+3. No non-essential steps (file paths, directory setup, etc.)
+
+Also check specifically for:
+- **How the counts matrix was filtered** (rule and threshold)
+- **Every statistical threshold**: DESeq2 padj, fgsea padj, DAVID/Enrichr cutoff
+- **The normalization used for sample QC** (VST or rlog)
+- **fgsea details**: gene set collection and version (C2 canonical pathways,
+  MSigDB version), ranking metric (log2FC), minSize/maxSize
+- **DAVID/Enrichr details**: background gene set, and whether up/down were
+  submitted together or separately
+- Genome and annotation versions for alignment/counting
+
+
+## Read Quality Control (1–2 paragraphs) 
+
+Required, even when there's no issue (they should state "no issue"):
+1. Range of read counts across samples — ~90M–100M
+2. Potential issues flagged by FastQC — high duplication
+3. Overrepresented sequences / adapter contamination — minimal
+4. Alignment rate — ~90% in most samples
+5. Multimapping rate
+6. A verdict on whether the data are high quality and suitable for downstream
+   analysis; if not, what they would do to improve it
+
+Notes: Most will flag the duplication; that's correct and present. A good
+answer explains that high duplication is common in RNAseq from highly expressed
+transcripts and isn't by itself disqualifying especially given the high depth.
+
+
+## Filtering the Counts Matrix (1–2 paragraphs)
+Required:
+- Two plots showing the count distribution before and after filtering (any
+  type — histogram, density, boxplot, barplot)
+- Number of genes before and after filtering, stated directly in the text
+- A paragraph justifying the filter
+
+Notes: There's no single right filter. Flag it if fewer than ~10k genes remain
+(likely too aggressive). Justification should fit this data (e.g. relating the
+threshold to group size of 3 or to library size), not just restate what the
+filter does.
+
+## Sample Quality Control (2 paragraphs)
+
+Required:
+- VST or rlog normalization of the filtered counts (per DESeq2 vignette)
+- PCA biplot of PC1 vs PC2, colored by sample information
+- Sample-to-sample distance heatmap or similar
+- Answers to: Do samples cluster by group? Any outliers? Does any covariate
+  explain variation better than group?
+- A decision: proceed with all samples as is, or change something — and why
+
+
+
+## Differential Expression Analysis (3–4 paragraphs)
+
+Required:
+1. Table of top 10 DE genes with DESeq2 statistics, **ranked by padj**
+2. A padj threshold and the number of significant genes, **split into up and
+   down** (should be more than ten)
+3. DAVID or Enrichr on the thresholded genes:
+   - Background gene set stated **and justified** (ideally the filtered
+     expressed genes, not the whole genome — mention this if they used the
+     default whole-genome background without comment)
+   - Up/down submitted together or separately, **and why**
+4. fgsea using **C2 canonical pathways** and **log2FC ranking**
+5. A padj threshold for fgsea and a plot of the top significant pathways
+6. Brief comments on the DAVID/Enrichr results
+7. Brief comments on fgsea: main pathways of interest and why
+8. Comparison of DAVID/Enrichr vs fgsea: what's similar, what's different
+
+For reference, the paper reported ECM, integrins, tyrosine kinases, β-cell
+development, and neuronal system processes.
+
+
+## Interpretations (2–3 paragraphs)
+
+Required:
+- Broad speculation on the major changes caused by the experimental condition
+- Which results most strongly support that speculation
+
+
+
+
+## Your Conclusions and Follow-up 
+
+Required:
+- At least 2 **validation** experiments, each with (a) the expected result if their
+  findings hold and (b) the result that would show they were wrong
+- At least 2 **extension** experiments
+
+Notes: Good validation proposals are independent of the original pipeline
+(e.g. qPCR on identified targets, immunostaining/flow for marker
+proteins, an independent clone or replicate line.
+
+
+---
+
+# Phase 2: Informed analysis
+
+## Introduction (1 paragraph)
+
+They should address three questions (exact wording not required):
+1. **Background** — TYK2 is a gene previously associated with T1D
+   predisposition
+2. **Why the study was done** — to examine TYK2's role by knocking it out and
+   observing changes during pancreatic endocrine cell development
+3. **Why these techniques** — RNAseq gives a transcriptome-wide view of how
+   TYK2 loss affects gene expression during development
+
+## Replicate Figures 3C and 3F (3–4 paragraphs)
+
+Required:
+- A volcano plot resembling 3C (doesn't need to match)
+- A plot resembling 3F using their DAVID/Enrichr or fgsea results (can reuse
+  their earlier plot; pathways need not match)
+- **Point 1:** Up/down counts **at the paper's threshold (FDR < 0.01)**, theirs
+  vs. the paper's (319 up, 412 down) — both numbers stated
+- **Point 2:** Comparison of the paper's enrichment results with both their
+  DAVID/Enrichr and fgsea results
+- **Point 3:** A list of candidate discrepancy sources, then **≥2 argued in
+  depth using the paper's Methods as evidence**, each with a proposed analysis
+  that would test it (not performed)
+
+Notes: Common candidates — genome/annotation version, aligner, counting
+method, filtering strategy, normalization, thresholds, multiple-testing
+correction, enrichment method or gene set version. Check that their claims
+about the paper's pipeline actually match the paper's Methods; a candidate
+not grounded in the Methods is weaker.
+
+
+## Comparing Interpretations (2–3 paragraphs)
+
+Required:
+- Genes/pathways the authors emphasized that were weak or absent in their
+  results, and how well the authors' data support those claims
+- Which of their findings agree with the authors'
+- Whether reaching the same result through a different pipeline raises or
+  lowers their confidence, and why
+
+
+## Conclusions (1–2 paragraphs)
+
+Required:
+- Compare their Phase 1 conclusions with the paper's
+- Did the paper propose follow-ups or perform validation?
+- How their proposals differed from what the authors did or proposed
+
+Notes: The paper followed the RNAseq with additional work, including
+single-cell transcriptomics across development, examining KRAS as the link to
+impaired endocrine precursor emergence, testing mature SC-islet function,
+TYK2 inhibition, IFNα response/antigen-presentation experiments, and CD8+
+T-cell cytotoxicity assays. Students should identify at least some of this.
+
+---
+
+
+
+## Appendix: reference code and sample answers
+
+Plots won't match exactly; use these for orientation only. Sample text is
+written as a student report would be. Try not to judge on quality of grammar, just
+preciseness (including specific examples) and completeness (they have everything
+requested).
+
+```{r, warning=FALSE,message=FALSE}
+library(DESeq2)
+library(tidyverse)
+library('fgsea')
+library('ggrepel')
+```
+
+```{r}
+coldata <- tibble(samples = c('exp_rep2','control_rep2','control_rep1','exp_rep3','exp_rep1','control_rep3'), condition = c('exp', 'control', 'control', 'exp', 'exp', 'control'))
+
+cts <- as.matrix(read.csv('verse_concat.csv', row.names='gene'))
+```
+
+### Experimental Design
+
+The experiment consists of two groups, control and experimental, with three
+biological replicates each (six samples total). The metadata provides only
+the condition label; no covariates such as sex, batch, are available. You can
+do a single condition comparison. Confounders that you might be concerned about
+are different clones of the KO cells, or batch if the samples were run at 
+different times. 
+
+### Methods
+
+Read quality was assessed with FastQC v0.12.1 with default parameters and
+summarized with MultiQC v1.33. Reads were aligned to the human reference
+genome GRCh38 (GENCODE release 50) with STAR v2.7.11b with default
+parameters. Gene-level counts were generated with VERSE v0.1.5 using the
+GENCODE v50 annotation with default parameters, and per-sample counts were
+concatenated into a single matrix. Genes were retained if they had at least
+10 counts in at least 3 samples. Differential expression was performed with
+DESeq2 v1.52 comparing experimental to control samples (design
+`~ condition`) with default parameters, and genes with padj < 0.05 were
+considered significant. For sample QC, counts were transformed with the
+variance-stabilizing transformation (`vst`, `blind = TRUE`). Enrichment of
+significant genes was assessed with Enrichr.
+
+Gene set enrichment analysis was performed with fgsea v1.32.4 on genes ranked
+by log2 fold change using the MSigDB C2 canonical pathways collection (2026),
+with minSize = 15 and maxSize = 500; pathways with padj < 0.25 were considered
+significant
+
+### Read Quality Control
+
+- Samples contained between roughly 90–100M per sample. 
+
+- FastQC flagged a high rate of sequence duplication in all samples. This is expected in RNAseq, where highly expressed transcripts are sequenced many times, and at this
+depth. 
+
+-Overrepresented sequences were minimal and no adapter contamination was detected.
+Students might point out that there are ~1M total overrepresented sequences. They
+can mention they might want to remove them or simply accept them as they are 
+very small in fraction.
+
+- Alignment rates are high (95% or greater) indicating a high quality experiment
+
+- The multimapping rate is relatively low (~5% across all samples)
+
+- Overall, the data are of high quality and suitable for downstream
+analysis. The duplication rate can be flagged as something to keep in mind but
+there are logical explanations for it. 
+
+### Filtering the Counts Matrix
+
+```{r}
+# Keep genes with >= 10 counts in at least 3 samples (size of one group)
+keep <- rowSums(cts >= 10) >= 3
+cts_filt <- cts[keep, ]
+
+c(before = nrow(cts), after = nrow(cts_filt))
+
+bind_rows(
+  tibble(stage = 'Before filtering', mean_count = rowMeans(cts)),
+  tibble(stage = 'After filtering',  mean_count = rowMeans(cts_filt))
+) %>%
+  mutate(stage = factor(stage, levels = c('Before filtering', 'After filtering'))) %>%
+  ggplot(aes(x = log10(mean_count + 1))) +
+  geom_histogram(bins = 60) +
+  facet_wrap(~ stage, ncol = 1) +
+  theme_minimal() +
+  xlab('log10(mean count + 1)') + ylab('Number of genes') +
+  ggtitle('Distribution of mean gene counts before and after filtering')
+```
+
+- We kept genes with at least 10 counts in at least 3 samples.
+
+- There were 63,241 genes before filtering and 20,579 after
+
+- The filtering shows that it largely removes genes with very low or zero counts
+as seen in the shift in distribution in the plots. 
+
+
+
+```{r}
+dds <- DESeqDataSetFromMatrix(countData = cts_filt,
+                              colData = coldata,
+                              design = ~ condition)
+```
+
+```{r, echo=F}
+dds <- DESeq(dds)
+res <- results(dds)
+resOrdered <- res[order(res$pvalue),]
+resOrdered
+```
+
+```{r}
+results <- resOrdered %>% as_tibble(rownames='gene')
+map <- read_delim('id2name.txt', col_names= c('id', 'symbol'))
+
+results <- results %>% left_join(map, by=join_by(gene == id))
+```
+
+### Sample Quality Control
+
+```{r}
+vsd <- vst(dds, blind=TRUE)
+plotPCA(vsd, intgroup=c("condition"))
+```
+
+```{r}
+sampleDists <- dist(t(assay(vsd)))
+
+library("RColorBrewer")
+library('pheatmap')
+sampleDistMatrix <- as.matrix(sampleDists)
+rownames(sampleDistMatrix) <- paste(vsd$condition, colnames(vsd), sep="-")
+colnames(sampleDistMatrix) <- NULL
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+- The samples largely cluster by experimental group. One experimental sample
+appears to be less similar to the other two. The distance plot shows mostly
+the same thing
+
+- There is no other covariate information
+
+- The samples largely separate on PC1 (86% of the variance) so we are somewhat
+confident that the experimental condition is driving some of the difference. We
+can confidently proceed to DE analysis. 
+
+
+### Differential Expression Analysis
+
+```{r}
+# Top ten DE genes by padj
+# (slice_min keeps the 10 smallest padj; top_n(wt = padj) returns the 10 largest)
+results %>% slice_min(padj, n = 10) %>% relocate(symbol)
+```
+
+```{r}
+# Significant genes at the chosen threshold, split by direction
+results %>%
+  filter(padj < 0.05) %>%
+  count(direction = if_else(log2FoldChange > 0, 'up', 'down'))
+```
+
+- At a padj threshold of .05, there are 682 downregulated and 572 up-regulated
+genes
+
+- I submitted all of the significant genes together to both DAVID and Enrichr
+and relied on the whole genome as background. I wanted to look at the broad 
+effects of the KO of this gene, and wasn't interested in specific directionality.
+
+OR
+
+- I submitted the significant genes separately because I wanted to more precisely
+interrogate which pathways were being up or down-regulated by TYK2KO. 
+
+- I performed FGSEA and used a padj threshold of < .25. A lot of pathways seem
+involved in beta cells, neuronal function and ECM related functions. 
+
+- The Enrichr / DAVID results show a similar theme of ECM related functions and
+neuronal development. 
+
+
+
+```{r}
+rnks <- results %>% arrange(desc(log2FoldChange)) %>% drop_na(log2FoldChange) %>% distinct(symbol, .keep_all = TRUE) %>% pull(log2FoldChange, symbol)
+c2 <- fgsea::gmtPathways('c2.cp.v2024.1.Hs.symbols.gmt')
+
+fgsea_results <- fgsea(c2, rnks, minSize = 15, maxSize=500)
+fgsea_results <- fgsea_results %>% as_tibble()
+```
+
+```{r}
+top_pos <- fgsea_results %>% slice_max(NES, n=10) %>% pull(pathway)
+top_neg <- fgsea_results %>% slice_min(NES, n=10) %>% pull(pathway)
+
+subset <- fgsea_results %>%
+    filter(pathway %in% c(top_pos, top_neg)) %>%
+    mutate(pathway = factor(pathway)) %>%
+    mutate(plot_name = str_replace_all(pathway, '_', ' '))
+
+subset %>%
+    mutate(plot_name = forcats::fct_reorder(factor(plot_name), NES)) %>%
+    ggplot() +
+    geom_bar(aes(x=plot_name, y=NES, fill = NES > 0), stat='identity', show.legend = FALSE) +
+    scale_fill_manual(values = c('TRUE' = 'red', 'FALSE' = 'blue')) +
+    theme_minimal(base_size = 8) +
+    ggtitle('fgsea results for MSigDB C2 canonical pathways') +
+    ylab('Normalized Enrichment Score (NES)') +
+    xlab('') +
+    scale_x_discrete(labels = function(x) str_wrap(x, width = 80)) +
+    coord_flip()
+```
+
+### Interpretations
+
+- This section will be highly subjective and very hard (I'm asking them to do
+this prior to knowing what the experiment was). 
+
+The experimental condition appears to change the developmental state of the
+cells, and fgsea shows negative enrichment of neuronal system pathways. 
+
+At the same time, upregulation of collagen, laminin and integrin genes and
+positive enrichment of ECM pathways suggest a shift in how cells interact
+with their environment.
+
+The strongest support for this interpretation is the agreement between
+Enrichr and fgsea on the ECM and neuronal themes, and the presence of
+lineage transcription factors among the top DE genes.
+
+### Your Conclusions and Follow-up
+
+- Accept anything that seems reasonable, below are some very common approaches:
+
+
+**Validation experiments**
+
+1. **qPCR on an independent differentiation.** Measure the top up- and
+   downregulated genes (e.g. [NEUROG3, NEUROD1, COL2A1]) in a new batch of
+   control and experimental cultures.
+2. **An independent line or clone.** Repeat the comparison in a second
+   line carrying the same perturbation. CRISPR-Cas KO lines can be variable.
+
+**Follow-up experiments**
+
+1. A time course across differentiation to determine when the expression
+   changes first appear.
+2. Single-cell RNAseq to determine whether the bulk changes come from a
+   shift in cell-type proportions or from changes within cell types.
+
+
+---
+
+### Phase 2: Introduction
+
+Type 1 diabetes (T1D) is an autoimmune disease in which insulin-producing
+pancreatic β-cells are destroyed. TYK2, a Janus kinase involved in type I
+interferon signaling, has been identified as a T1D susceptibility gene,
+but only in large GWAS studies.
+
+The authors knocked out TYK2 in human iPSCs and differentiated
+them toward the pancreatic endocrine lineage to ask how TYK2 loss affects
+β-cell development and the response to interferon-α. 
+
+They used bulk RNAseq because it measures expression across the whole transcriptome, allowing an unbiased view of which genes and pathways TYK2 loss affects at a given
+developmental stage, followed by enrichment analysis to group those changes
+into biological processes.
+
+### Replicate Figures 3C and 3F
+
+```{r}
+selected <- c('ELMO1', 'PAK3', 'INSM1', 'NEUROG3', 'GAB2', 'NOS3', 'PAX6', 'NEUROD1', 'ONECUT1', 'KRAS', 'LAMB2', 'SPP', 'DUSP6', 'SPRY2', 'PLAT', 'AKT3', 'SLC2A2', 'BAX', 'COL2A1', 'APOE', 'LAMA4', 'KDR', 'PGF', 'PTPRU', 'COL9A2', 'NTRK2')
+
+results <- results %>% mutate(label = if_else(symbol %in% selected, TRUE, FALSE))
+```
+
+```{r}
+labeled_results <- results %>% mutate(volc_plot_status = case_when(log2FoldChange > 0 & padj < .15 ~ 'UP',
+                                        log2FoldChange < 0 & padj < .15 ~ 'DOWN',
+                                        TRUE ~ 'NS'))
+
+labeled_results %>%
+    ggplot(mapping=aes(x=log2FoldChange, y=-log10(padj), color=volc_plot_status)) +
+    geom_point() +
+    geom_hline(yintercept = -log10(0.1), linetype = "dashed") +
+    geom_text_repel(data = labeled_results %>% filter(label == TRUE), aes(label=symbol), max.overlaps=100) +
+    theme_minimal() +
+    ggtitle('Volcano plot of DESeq2 differential expression results TYK2KO S5 vs WT')
+```
+
+```{r}
+labeled_results %>% filter(symbol %in% selected) %>% relocate(symbol)
+```
+
+```{r}
+# Counts at the paper's threshold
+results %>%
+  filter(padj < 0.01) %>%
+  count(direction = if_else(log2FoldChange > 0, 'up', 'down'))
+```
+
+**1. DE gene counts.** At the paper's threshold of FDR < 0.01, we found 332
+upregulated and 403 downregulated genes, compared with 319 upregulated and
+412 downregulated genes reported by the authors.
+
+**2. Enrichment.** The authors reported enrichment of ECM, integrin,
+tyrosine kinase, β-cell development and neuronal system pathways. Our fgsea
+results recovered ECM, integrin and neuronal system pathways, and Enrichr
+recovered terms involved in ECM and neuronal systems. 
+
+**3. Sources of discrepancy.** Candidate sources include genome and
+annotation version, aligner and read counting method, count filtering,
+normalization, the DE tool, thresholds, multiple-testing correction, and the
+enrichment method and gene set version. We think two contribute most:
+
+- **Filtering strategy.** The authors removed genes with less than 50 reads
+  across all samples. Our filter retains ~20k genes.
+
+  *Test:* re-run DESeq2 using the authors' filter (or none) and compare the
+  number and overlap of significant genes with our current list.
+  
+- **Enrichment method and gene sets.** The authors used X (e.g. Reactome
+  via DAVID) on thresholded genes], while we used fgsea on a ranked list
+  with MSigDB C2 v2024.1. Gene set databases are updated over time and
+  ranked vs. thresholded methods detect different signals. *Test:* submit
+  our significant genes to the same tool and database version the authors
+  used and check whether their pathways reappear.
+
+[A third candidate, if relevant: genome/annotation or aligner differences,
+tested by realigning with the authors' reference and tools and correlating
+per-gene counts with ours.]
+
+### Comparing Interpretations
+
+The authors emphasized TYK2's role in the emergence of endocrine precursors
+and linked it to reduced KRAS expression. In our results, KRAS was significant
+so this link was supported in our analysis. Their emphasis on KRAS rests largely
+on follow-up experiments rather than the bulk RNAseq alone, so we think the claim is
+reasonably supported but not by the transcriptomic data by itself.
+
+Our findings agree with the authors' on ECM/integrin changes and reduced
+expression of endocrine and neuronal lineage genes. Reaching the same
+result with a different pipeline makes us more confident that these
+findings are robust to analytic choices such as filtering and enrichment
+method. However, both analyses use the same samples, so agreement does not
+rule out problems with the samples themselves (e.g. batch effects or a
+clone-specific effect); only independent experiments can address that.
+
+### Conclusions
+
+In Phase 1 we concluded that the experimental condition impairs a
+differentiation program and alters ECM interactions. This broadly matches
+the paper's conclusion that TYK2 loss compromises the formation of
+endocrine precursors, although we could not have known the interferon
+context of the study. The authors went beyond the bulk RNAseq with
+single-cell transcriptomics across development, experiments linking the
+phenotype to KRAS, functional testing of mature SC-islets, TYK2 inhibition,
+and assays of interferon-α response, antigen presentation and CD8+ T-cell
+cytotoxicity. Our proposed single-cell experiment overlaps with theirs,
+while our proposed qPCR and independent-clone validations [were / were not]
+addressed in the paper. Their immune and interferon experiments addressed a
+question we could not have anticipated from the blind data.
