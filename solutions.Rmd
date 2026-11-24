@@ -217,9 +217,9 @@ library('ggrepel')
 ```
 
 ```{r}
-coldata <- tibble(samples = c('exp_rep2','control_rep2','control_rep1','exp_rep3','exp_rep1','control_rep3'), condition = c('exp', 'control', 'control', 'exp', 'exp', 'control'))
+coldata <- tibble(samples = c('exp_rep3','exp_rep1','exp_rep2','control_rep3','control_rep2','control_rep1'), condition = c('exp', 'exp', 'exp', 'control', 'control', 'control'))
 
-cts <- as.matrix(read.csv('verse_concat.csv', row.names='gene'))
+cts <- as.matrix(read.csv('results/verse_concat.csv', row.names='gene'))
 ```
 
 ### Experimental Design
@@ -317,7 +317,7 @@ resOrdered
 
 ```{r}
 results <- resOrdered %>% as_tibble(rownames='gene')
-map <- read_delim('id2name.txt', col_names= c('id', 'symbol'))
+map <- read_delim('results/id2name.txt', col_names= c('id', 'symbol'))
 
 results <- results %>% left_join(map, by=join_by(gene == id))
 ```
@@ -372,7 +372,7 @@ results %>%
 ```
 
 - At a padj threshold of .05, there are 682 downregulated and 572 up-regulated
-genes
+genes. The most significant genes ranked by padj are RPS4Y1, PNPO, PCDHGA10. 
 
 - I submitted all of the significant genes together to both DAVID and Enrichr
 and relied on the whole genome as background. I wanted to look at the broad 
@@ -383,8 +383,11 @@ OR
 - I submitted the significant genes separately because I wanted to more precisely
 interrogate which pathways were being up or down-regulated by TYK2KO. 
 
-- I performed FGSEA and used a padj threshold of < .25. A lot of pathways seem
-involved in beta cells, neuronal function and ECM related functions. 
+- I performed FGSEA and used a padj threshold of < .25. Significant pathways
+with a positive NES include PID P53 Downstream pathway, PID Integrin1 pathway, 
+and REACTOME met promotes cell motility. Significant pathways with a negative
+NES include REACTOME regulation of gene expression in Beta cells and regulation
+of beta cell development. 
 
 - The Enrichr / DAVID results show a similar theme of ECM related functions and
 neuronal development. 
@@ -528,16 +531,16 @@ enrichment method and gene set version. We think two contribute most:
   *Test:* re-run DESeq2 using the authors' filter (or none) and compare the
   number and overlap of significant genes with our current list.
   
-- **Enrichment method and gene sets.** The authors used X (e.g. Reactome
-  via DAVID) on thresholded genes], while we used fgsea on a ranked list
+- **Enrichment method and gene sets.** The authors used  Reactome
+  gene sets on thresholded genes, while we used fgsea on a ranked list
   with MSigDB C2 v2024.1. Gene set databases are updated over time and
   ranked vs. thresholded methods detect different signals. *Test:* submit
   our significant genes to the same tool and database version the authors
   used and check whether their pathways reappear.
 
-[A third candidate, if relevant: genome/annotation or aligner differences,
+A third candidate, if relevant: genome/annotation or aligner differences,
 tested by realigning with the authors' reference and tools and correlating
-per-gene counts with ours.]
+per-gene counts with ours.
 
 ### Comparing Interpretations
 
@@ -545,15 +548,22 @@ The authors emphasized TYK2's role in the emergence of endocrine precursors
 and linked it to reduced KRAS expression. In our results, KRAS was significant
 so this link was supported in our analysis. Their emphasis on KRAS rests largely
 on follow-up experiments rather than the bulk RNAseq alone, so we think the claim is
-reasonably supported but not by the transcriptomic data by itself.
+reasonably supported but not by the transcriptomic data by itself. In our experiment,
+KRAS (padj, 1.759817e-16)was upregulated with a 1.09 log fold change and
+NEUROG3 (padj, 1.977759e-08	) was downregulated with a -0.9 log fold change. 
+
+We find similar directionality with GSEA demonstrating REACTOME regulation of gene
+expression in Beta cells and REACTOME regulation of beta cell development pathways
+(padj <.25). My results show a number of significant ECM related pathways 
+(PID Integrin1 pathway, REACTOME met promotes cell motility). 
 
 Our findings agree with the authors' on ECM/integrin changes and reduced
 expression of endocrine and neuronal lineage genes. Reaching the same
 result with a different pipeline makes us more confident that these
 findings are robust to analytic choices such as filtering and enrichment
 method. However, both analyses use the same samples, so agreement does not
-rule out problems with the samples themselves (e.g. batch effects or a
-clone-specific effect); only independent experiments can address that.
+rule out problems with the samples themselves. The results are at least robust
+to relatively minor methodological choices. 
 
 ### Conclusions
 
