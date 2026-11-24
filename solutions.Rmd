@@ -383,11 +383,13 @@ OR
 - I submitted the significant genes separately because I wanted to more precisely
 interrogate which pathways were being up or down-regulated by TYK2KO. 
 
-- I performed FGSEA and used a padj threshold of < .25. Significant pathways
-with a positive NES include PID P53 Downstream pathway, PID Integrin1 pathway, 
-and REACTOME met promotes cell motility. Significant pathways with a negative
-NES include REACTOME regulation of gene expression in Beta cells and regulation
-of beta cell development. 
+- I performed FGSEA using ranked log2FC against the MSIGDB C2 canonical pathways
+set and used a padj threshold of < .25. 
+
+Significant pathways with a positive NES include PID P53 Downstream pathway,
+PID Integrin1 pathway, and REACTOME met promotes cell motility. Significant
+pathways with a negative NES include REACTOME regulation of gene expression in
+Beta cells and regulation of beta cell development. 
 
 - The Enrichr / DAVID results show a similar theme of ECM related functions and
 neuronal development. 
